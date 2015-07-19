@@ -537,19 +537,19 @@ namespace HeavenStrikeRiven
         {
             var targetW = MinionManager.GetMinions(Player.Position,WRange() + 100 , MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.Health).FirstOrDefault();
             var targetW2 = MinionManager.GetMinions(Player.Position, WRange() + 100, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault();
-            if (targetW != null && InWRange(targetW) && W.IsReady() && Orbwalking.CanMove(Windup + 20))
+            if (targetW != null && InWRange(targetW) && W.IsReady() && Orbwalking.CanMove(Windup + 20) && UseWClear)
             {
                 W.Cast();
             }
-            if (targetW2 != null && InWRange(targetW2) && W.IsReady() && Orbwalking.CanMove(Windup + 20))
+            if (targetW2 != null && InWRange(targetW2) && W.IsReady() && Orbwalking.CanMove(Windup + 20) && UseWClear)
             {
                 W.Cast();
             }
-            if (targetW != null && InWRange(targetW) && E.IsReady() && Orbwalking.CanMove(Windup + 20))
+            if (targetW != null && InWRange(targetW) && E.IsReady() && Orbwalking.CanMove(Windup + 20) && UseEClear)
             {
                 E.Cast(targetW.Position);
             }
-            if (targetW2 != null && InWRange(targetW2) && E.IsReady() && Orbwalking.CanMove(Windup + 20))
+            if (targetW2 != null && InWRange(targetW2) && E.IsReady() && Orbwalking.CanMove(Windup + 20) && UseEClear)
             {
                 E.Cast(targetW2.Position);
             }
