@@ -578,7 +578,7 @@ namespace HeavenStrikeRiven
             if (!Q.IsReady(1000)) Qstate = 1;
             if (waitQ == true )
             {
-                if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2)
+                //if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2)
                     if(Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear) 
                     {
                         if (TTTar.IsValidTarget() && !TTTar.IsZombie)
@@ -590,8 +590,8 @@ namespace HeavenStrikeRiven
                     {
                         Q.Cast(Game.CursorPos);
                     }
-                else
-                    waitQ = false;
+                //else
+                //    waitQ = false;
             }
             if (Q.IsReady() && UseQBeforeExpiry && !Player.IsRecalling())
             {
