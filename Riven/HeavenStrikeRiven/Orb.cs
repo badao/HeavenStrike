@@ -54,7 +54,6 @@ namespace HeavenStrikeRiven
         }
         public static void Remove(int ID)
         {
-            Game.Say("remove");
             for (var i = ActionList.Count - 1; i >= 0; i--)
             {
                 if (ActionList[i].Identify == ID)

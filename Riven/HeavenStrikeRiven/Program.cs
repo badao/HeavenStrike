@@ -578,7 +578,7 @@ namespace HeavenStrikeRiven
             if (!Q.IsReady(1000)) Qstate = 1;
             if (waitQ == true )
             {
-                if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2 && TTTar.IsValidTarget() && !TTTar.IsZombie)
+                if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2 && TTTar != null)
                     Q.Cast(TTTar.Position);
                 else
                     waitQ = false;
