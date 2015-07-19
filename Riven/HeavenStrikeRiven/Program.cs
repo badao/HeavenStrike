@@ -441,8 +441,8 @@ namespace HeavenStrikeRiven
         {
             if (Q.IsReady() && Orbwalking.CanMove(Windup + 20) && QGap && !Player.IsDashing())
             {
-                var target = HeroManager.Enemies.OrderByDescending(x => 1 - x.Distance(Player.Position)).FirstOrDefault();
-                if (!Player.IsDashing() && Utils.GameTimeTickCount - cQ >= 1000 )
+                var target = HeroManager.Enemies.Where(x=>x.IsValidTarget()).OrderByDescending(x => 1 - x.Distance(Player.Position)).FirstOrDefault();
+                if (!Player.IsDashing() && Utils.GameTimeTickCount - cQ >= 1000 && target.IsValidTarget())
                 {
                     if (Prediction.GetPrediction(Player, 100).UnitPosition.Distance(target.Position) <= Player.Distance(target.Position))
                         Q.Cast(Game.CursorPos);
@@ -578,8 +578,18 @@ namespace HeavenStrikeRiven
             if (!Q.IsReady(1000)) Qstate = 1;
             if (waitQ == true )
             {
-                if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2 && TTTar != null)
-                    Q.Cast(TTTar.Position);
+                if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2)
+                    if(Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear) 
+                    {
+                        if (TTTar.IsValidTarget() && !TTTar.IsZombie)
+                        {
+                            Q.Cast(TTTar.Position);
+                        }
+                    }
+                    else
+                    {
+                        Q.Cast(Game.CursorPos);
+                    }
                 else
                     waitQ = false;
             }
