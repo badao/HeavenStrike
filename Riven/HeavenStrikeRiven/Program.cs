@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -581,10 +581,7 @@ namespace HeavenStrikeRiven
                 //if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2)
                     if(Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear) 
                     {
-                        if (TTTar.IsValidTarget() && !TTTar.IsZombie)
-                        {
-                            Q.Cast(TTTar.Position);
-                        }
+                        Q.Cast(Game.CursorPos);
                     }
                     else
                     {
