@@ -60,6 +60,7 @@ namespace HeavenStrikeRiven
             E = new Spell(SpellSlot.E, 325);
             R = new Spell(SpellSlot.R, 900);
             R.SetSkillshot(0.25f, 45, 1600, false, SkillshotType.SkillshotCone);
+            R.MinHitChance = HitChance.Medium;
 
             Menu = new Menu("Heaven Strike " + Player.ChampionName, Player.ChampionName, true);
             Menu orbwalkerMenu = new Menu("Orbwalker", "Orbwalker");
