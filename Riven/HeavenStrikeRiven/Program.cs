@@ -26,7 +26,7 @@ namespace HeavenStrikeRiven
 
         private static Menu Menu;
 
-        private static bool waitE, waitQ, waitAA, waitW, waitTiamat, waitR1, waitR2, midAA, canAA, forceQ, forceW, forceT, forceR, waitR, castR, forceEburst, qGap
+        public static bool waitE, waitQ, waitAA, waitW, waitTiamat, waitR1, waitR2, midAA, canAA, forceQ, forceW, forceT, forceR, waitR, castR, forceEburst, qGap
             , R2style;
 
         private static AttackableUnit TTTar = null;
@@ -181,7 +181,7 @@ namespace HeavenStrikeRiven
                     }
                     if (Q.IsReady())
                     {
-                        DelayAction.Add(150, () => Q.Cast(target.Position), 1);
+                        DelayAction.Add(150, () => callbackQ(TTTar), 1);
                     }
                 }
                 else if (W.IsReady() && InWRange(target))
@@ -327,9 +327,8 @@ namespace HeavenStrikeRiven
                     }
                 }
             }
-            if (spell.Name.Contains("RivenBasicAttack"))
+            if (args.SData.IsAutoAttack())
             {
-                //if (Utils.GameTimeTickCount > cQ && Utils.GameTimeTickCount - cQ <= 180)
                     
             }
             if (spell.Name.Contains("RivenTriCleave"))
@@ -616,7 +615,7 @@ namespace HeavenStrikeRiven
         }
         private static void reset()
         {
-            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(Game.CursorPos, Player.Distance(Game.CursorPos)+ 500));
         }
         private static bool InWRange (AttackableUnit target)
         {
