@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -147,28 +147,40 @@ namespace HeavenStrikeRiven
         {
             Player = ObjectManager.Player;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
-            GameObject.OnCreate += Obj_SpellMissile_OnCreate;
+            //GameObject.OnCreate += Obj_SpellMissile_OnCreate;
             Spellbook.OnStopCast += SpellbookOnStopCast;
             CustomEvents.Unit.OnDash += Unit_OnDash;
+            Game.OnUpdate += Game_OnUpdate;
         }
 
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            if (Utils.TickCount - qtick >= 350 && dashbool == true)
+            {
+                dashbool = false;
+            }
+        }
         private static void Unit_OnDash(Obj_AI_Base sender, Dash.DashItem args)
         {
             if (!sender.IsMe)
                 return;
-        }
-
-        private static void Obj_SpellMissile_OnCreate(GameObject sender, EventArgs args)
-        {
-            if (sender.IsValid<Obj_SpellMissile>())
+            if (args.StartPos.Distance(args.EndPos) <= 100)
             {
-                var missile = (Obj_SpellMissile)sender;
-                if (missile.SpellCaster.IsValid<Obj_AI_Hero>() && IsAutoAttack(missile.SData.Name))
-                {
-                    FireAfterAttack(missile.SpellCaster, _lastTarget);
-                }
+                dashbool = true;
             }
         }
+
+        //private static void Obj_SpellMissile_OnCreate(GameObject sender, EventArgs args)
+        //{
+        //    if (sender.IsValid<Obj_SpellMissile>())
+        //    {
+        //        var missile = (Obj_SpellMissile)sender;
+        //        if (missile.SpellCaster.IsValid<Obj_AI_Hero>() && IsAutoAttack(missile.SData.Name))
+        //        {
+        //            FireAfterAttack(missile.SpellCaster, _lastTarget);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         ///     This event is fired before the player auto attacks.
@@ -411,7 +423,7 @@ namespace HeavenStrikeRiven
         {
             try
             {
-                if (target.IsValidTarget() && CanAttack() && InAutoAttackRange(target))
+                if (target.IsValidTarget() && CanAttack() && InAutoAttackRange(target) && !Player.IsDashing())
                 {
                     DisableNextAttack = false;
                     FireBeforeAttack(target);
@@ -456,6 +468,15 @@ namespace HeavenStrikeRiven
                 ResetAutoAttackTimer();
             }
         }
+        private static int qtick;
+        private static bool dashbool = false;
+        private static bool IsdoingQ()
+        {
+            if (Utils.GameTimeTickCount > qtick && Utils.GameTimeTickCount - qtick <= 500 - Game.Ping / 2)
+                return true;
+            else
+                return false;
+        }
 
         private static void OnProcessSpell(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs Spell)
         {
@@ -463,6 +484,10 @@ namespace HeavenStrikeRiven
             {
                 var spellName = Spell.SData.Name;
 
+                if (spellName.Contains("RivenTriCleave"))
+                {
+                    qtick = Utils.GameTimeTickCount;
+                }
                 if (IsAutoAttackReset(spellName) && unit.IsMe)
                 {
                     Utility.DelayAction.Add(250, ResetAutoAttackTimer);
@@ -476,7 +501,15 @@ namespace HeavenStrikeRiven
                 {
                     return;
                 }
-                if (unit.IsMe &&
+                if (Program.waitQ == true)
+                {
+                    ResetAutoAttackTimer();
+                }
+                else if (Program.waitQ == false && Utils.GameTimeTickCount - qtick <= 200)
+                {
+                    ResetAutoAttackTimer();
+                }
+                else if (unit.IsMe &&
                     (Spell.Target is Obj_AI_Base || Spell.Target is Obj_BarracksDampener || Spell.Target is Obj_HQ))
                 {
                     LastAATick = Utils.GameTimeTickCount - Game.Ping / 2;
@@ -883,6 +916,8 @@ namespace HeavenStrikeRiven
                         _config.Item("HoldZone").GetValue<Circle>().Color);
                 }
             }
+            
+
         }
     }
 }
