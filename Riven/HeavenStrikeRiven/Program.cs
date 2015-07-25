@@ -76,7 +76,8 @@ namespace HeavenStrikeRiven
             spellMenu.AddItem(new MenuItem("Ecombo", "Ecombo").SetValue(true));
             spellMenu.AddItem(new MenuItem("Q Gap", "Q Gap").SetValue(false));
             spellMenu.AddItem(new MenuItem("Use Q Before Expiry", "Use Q Before Expiry").SetValue(true));
-            //spellMenu.AddItem(new MenuItem("Q strange Cancel", "Q strange Cancel").SetValue(true));
+            spellMenu.AddItem(new MenuItem("Q strange Cancel", "Q strange Cancel").SetValue(true));
+            spellMenu.AddItem(new MenuItem("Qmode", "Q cast mode").SetValue(new StringList(new[] {"Lock Target","To Mouse" }, 0)));
             Menu BurstCombo = spellMenu.AddSubMenu(new Menu("Burst Combo", "Burst Combo"));
             //BurstCombo.AddItem(new MenuItem("Burst", "Burst").SetValue(new KeyBind('T', KeyBindType.Press)));
             BurstCombo.AddItem(new MenuItem("Use Flash", "Use Flash").SetValue(false));
@@ -107,7 +108,8 @@ namespace HeavenStrikeRiven
             AntiGapcloser.OnEnemyGapcloser += gapcloser;
 
         }
-
+        private static int Qmode { get { return Menu.Item("Qmode").GetValue<StringList>().SelectedIndex; } }
+        private static bool Qstrangecancel { get { return Menu.Item("Q strange Cancel").GetValue<bool>(); } }
         private static bool Rcomboalways { get { return Menu.Item("RcomboAlways").GetValue<bool>(); } }
         private static bool RcomboKillable { get { return Menu.Item("RcomboKillable").GetValue<bool>(); } }
         private static bool R2comboKS { get { return Menu.Item("R2comboKS").GetValue<bool>(); } }
@@ -168,6 +170,7 @@ namespace HeavenStrikeRiven
         }
         private static void AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
+            TTTar = target;
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 if (HasItem())
@@ -324,7 +327,7 @@ namespace HeavenStrikeRiven
                 {
                     if (Q.IsReady())
                     {
-                        waitQ = true;
+                        callbackQ(TTTar);
                     }
                 }
             }
@@ -581,11 +584,17 @@ namespace HeavenStrikeRiven
                 //if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2)
                     if(Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear) 
                     {
-                        Q.Cast(Game.CursorPos);
+                        if (Qmode == 0 && TTTar != null)
+                            Q.Cast(TTTar.Position);
+                        else
+                            Q.Cast(Game.CursorPos);
                     }
                     else
                     {
-                        Q.Cast(Game.CursorPos);
+                        if (Qmode == 0 && TTTar != null)
+                            Q.Cast(TTTar.Position);
+                        else
+                            Q.Cast(Game.CursorPos);
                     }
                 //else
                 //    waitQ = false;
@@ -617,6 +626,7 @@ namespace HeavenStrikeRiven
         private static void reset()
         {
             Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(Game.CursorPos, Player.Distance(Game.CursorPos)+ 500));
+            if (Qstrangecancel) Game.Say("/d");
         }
         private static bool InWRange (AttackableUnit target)
         {
