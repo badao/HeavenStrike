@@ -134,7 +134,7 @@ namespace HeavenStrikeRiven
         private static bool UseEClear { get { return Menu.Item("Use E").GetValue<bool>(); } }
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            Attackcanceled();
+            //Attackcanceled();
             SolvingWaitList();
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
                 Clear();
@@ -185,7 +185,7 @@ namespace HeavenStrikeRiven
                     }
                     if (Q.IsReady())
                     {
-                        DelayAction.Add(150, () => callbackQ(TTTar), 1);
+                        Utility.DelayAction.Add(150, () => callbackQ(TTTar));
                     }
                 }
                 else if (W.IsReady() && InWRange(target))
@@ -193,7 +193,7 @@ namespace HeavenStrikeRiven
                     W.Cast();
                     if (Q.IsReady())
                     {
-                        DelayAction.Add(150, () => callbackQ(TTTar), 1);
+                        Utility.DelayAction.Add(150, () => callbackQ(TTTar));
                     }
                 }
                 else if (Q.IsReady())
@@ -216,7 +216,7 @@ namespace HeavenStrikeRiven
                     W.Cast();
                     if (Q.IsReady() && UseQClear)
                     {
-                        DelayAction.Add(150, () => callbackQ(TTTar), 1);
+                        Utility.DelayAction.Add(150, () => callbackQ(TTTar));
                     }
                 }
                 else if (Q.IsReady() && UseQClear)
@@ -237,11 +237,11 @@ namespace HeavenStrikeRiven
                     {
                         if (target is Obj_AI_Hero)
                         {
-                            DelayAction.Add(250, () => R.Cast(target as Obj_AI_Hero), 1);
+                            Utility.DelayAction.Add(250, () => R.Cast(target as Obj_AI_Hero));
                         }
                         if (Q.IsReady())
                         {
-                            DelayAction.Add(400, () => callbackQ(TTTar), 1);
+                            Utility.DelayAction.Add(150, () => callbackQ(TTTar));
                         }
                     }
 
@@ -254,7 +254,7 @@ namespace HeavenStrikeRiven
                     }
                     if (Q.IsReady())
                     {
-                        DelayAction.Add(150, () => callbackQ(TTTar), 1);
+                        Utility.DelayAction.Add(150, () => callbackQ(TTTar));
                     }
                 }
                 else if (W.IsReady() && InWRange(target))
@@ -262,7 +262,7 @@ namespace HeavenStrikeRiven
                     W.Cast();
                     if (Q.IsReady())
                     {
-                        DelayAction.Add(150, () => callbackQ(TTTar), 1);
+                        Utility.DelayAction.Add(150, () => callbackQ(TTTar));
                     }
                 }
                 else if (Q.IsReady())
@@ -285,7 +285,7 @@ namespace HeavenStrikeRiven
                     W.Cast();
                     if (Q.IsReady())
                     {
-                        DelayAction.Add(150, () => Q.Cast(target.Position), 1);
+                        Utility.DelayAction.Add(150, () => callbackQ(TTTar));
                     }
                 }
                 else if (Q.IsReady())
@@ -317,6 +317,7 @@ namespace HeavenStrikeRiven
         private static void oncast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             var spell = args.SData;
+
             if (!sender.IsMe)
             {
                 return;
@@ -346,9 +347,9 @@ namespace HeavenStrikeRiven
                 waitQ = false;
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
                 {
-                    DelayAction.Add(100, () => reset(), 1);
+                    Utility.DelayAction.Add(100, () => Reset());
                 }
-                DelayAction.Add(350 - Game.Ping / 2, () => Orbwalking.ResetAutoAttackTimer(), 1);
+                //DelayAction.Add(350 - Game.Ping / 2, () => Orbwalking.ResetAutoAttackTimer(), 1);
                 cQ = Utils.GameTimeTickCount;
                 Qstate = Qstate + 1;
             }
@@ -372,7 +373,7 @@ namespace HeavenStrikeRiven
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Burst)
                 {
                     if (R.IsReady() && R.Instance.Name == R1name)
-                        DelayAction.Add(150, () => R.Cast(), 1);
+                        Utility.DelayAction.Add(150, () => R.Cast());
                 }
             }
             if (spell.Name.Contains("RivenFengShuiEngine"))
@@ -386,15 +387,28 @@ namespace HeavenStrikeRiven
             }
             if (spell.Name.Contains("rivenizunablade"))
             {
-                if (Orbwalking.LastAATick + Game.Ping / 2 <= Utils.GameTimeTickCount
-                    && Utils.GameTimeTickCount <= Orbwalking.LastAATick + Game.Ping + 40 + Player.AttackCastDelay * 1000)
-                {
-                    DelayAction.Remove(2);
-                    Orbwalking.ResetAutoAttackTimer();
-                }
+                //if (Orbwalking.LastAATick + Game.Ping / 2 <= Utils.GameTimeTickCount
+                //    && Utils.GameTimeTickCount <= Orbwalking.LastAATick + Game.Ping + 40 + Player.AttackCastDelay * 1000)
+                //{
+                //    DelayAction.Remove(2);
+                //    Orbwalking.ResetAutoAttackTimer();
+                //}
             }
         }
-
+        private static void Reset()
+        {
+            Utility.DelayAction.Add( 0, () => Orbwalking.ResetAutoAttackTimer());
+            for (int i = 10; i < 300; i = i + 10)
+            {
+                if (i - Game.Ping >= 0)
+                    Utility.DelayAction.Add(i - Game.Ping, () => Cancel());
+            }
+        }
+        private static void Cancel()
+        {
+            Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(Game.CursorPos, Player.Distance(Game.CursorPos) + 500));
+            Game.Say("/d");
+        }
         private static void OnAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (unit.IsMe && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -629,11 +643,11 @@ namespace HeavenStrikeRiven
             if (ItemData.Ravenous_Hydra_Melee_Only.GetItem().IsReady())
                 ItemData.Ravenous_Hydra_Melee_Only.GetItem().Cast();
         }
-        private static void reset()
-        {
-            Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(Game.CursorPos, Player.Distance(Game.CursorPos) + 500));
-            if (Qstrangecancel) Game.Say("/d");
-        }
+        //private static void reset()
+        //{
+        //    Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(Game.CursorPos, Player.Distance(Game.CursorPos) + 500));
+        //    if (Qstrangecancel) Game.Say("/d");
+        //}
         private static bool InWRange(AttackableUnit target)
         {
             if (Player.HasBuff("RivenFengShuiEngine"))
@@ -749,19 +763,19 @@ namespace HeavenStrikeRiven
             }
             else return 0;
         }
-        private static void Attackcanceled()
-        {
-            if (Player.HasBuffOfType(BuffType.Stun) || Player.HasBuffOfType(BuffType.Taunt) || Player.HasBuffOfType(BuffType.Suppression)
-                || Player.HasBuffOfType(BuffType.Knockup) || Player.HasBuffOfType(BuffType.Knockback) || Player.HasBuffOfType(BuffType.Fear))
-            {
-                if (Orbwalking.LastAATick + Game.Ping / 2 <= Utils.GameTimeTickCount && Orbwalking.LastAATick != 0
-                    && Utils.GameTimeTickCount <= Orbwalking.LastAATick + Game.Ping + 40 + Player.AttackCastDelay * 1000)
-                {
-                    DelayAction.Remove(2);
-                    Orbwalking.ResetAutoAttackTimer();
-                }
-            }
-        }
+        //private static void Attackcanceled()
+        //{
+        //    if (Player.HasBuffOfType(BuffType.Stun) || Player.HasBuffOfType(BuffType.Taunt) || Player.HasBuffOfType(BuffType.Suppression)
+        //        || Player.HasBuffOfType(BuffType.Knockup) || Player.HasBuffOfType(BuffType.Knockback) || Player.HasBuffOfType(BuffType.Fear))
+        //    {
+        //        if (Orbwalking.LastAATick + Game.Ping / 2 <= Utils.GameTimeTickCount && Orbwalking.LastAATick != 0
+        //            && Utils.GameTimeTickCount <= Orbwalking.LastAATick + Game.Ping + 40 + Player.AttackCastDelay * 1000)
+        //        {
+        //            DelayAction.Remove(2);
+        //            Orbwalking.ResetAutoAttackTimer();
+        //        }
+        //    }
+        //}
         public static void walljump()
         {
             var x = Player.Position.Extend(Game.CursorPos, 100);
