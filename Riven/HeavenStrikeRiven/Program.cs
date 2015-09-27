@@ -104,6 +104,7 @@ namespace HeavenStrikeRiven
             Orbwalking.AfterAttack += AfterAttack;
             Orbwalking.OnAttack += OnAttack;
             Obj_AI_Base.OnProcessSpellCast += oncast;
+            Obj_AI_Base.OnPlayAnimation += Obj_AI_Base_OnPlayAnimation;
             Interrupter2.OnInterruptableTarget += interrupt;
             AntiGapcloser.OnEnemyGapcloser += gapcloser;
 
@@ -347,7 +348,7 @@ namespace HeavenStrikeRiven
                 waitQ = false;
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
                 {
-                    Utility.DelayAction.Add(100, () => Reset());
+                    //Utility.DelayAction.Add(100, () => Reset());
                 }
                 //DelayAction.Add(350 - Game.Ping / 2, () => Orbwalking.ResetAutoAttackTimer(), 1);
                 cQ = Utils.GameTimeTickCount;
@@ -393,6 +394,42 @@ namespace HeavenStrikeRiven
                 //    DelayAction.Remove(2);
                 //    Orbwalking.ResetAutoAttackTimer();
                 //}
+            }
+        }
+        private static void Obj_AI_Base_OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
+        {
+             if (sender.IsMe && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
+            {
+                int t = 0;
+                switch (args.Animation)
+                {
+                    case "Spell1a":
+                        Reset(291);
+                        break;
+                    case "Spell1b":
+                        Reset(291);
+                        break;
+                    case "Spell1c":
+                        Reset(393);
+                        break;
+                    case "Spell2":
+                        Reset(170);
+                        break;
+                    case "Spell3":
+                        break;
+                    case "Spell4b":
+                        Reset(150);
+                        break;
+                }
+             }
+        }
+        private static void Reset(int t)
+        {
+            Utility.DelayAction.Add(0, () => Orbwalking.ResetAutoAttackTimer());
+            for (int i = 10; i < t; i = i + 10)
+            {
+                if (i - Game.Ping >= 0)
+                    Utility.DelayAction.Add(i - Game.Ping, () => Cancel());
             }
         }
         private static void Reset()
