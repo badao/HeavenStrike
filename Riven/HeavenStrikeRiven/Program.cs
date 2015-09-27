@@ -493,6 +493,7 @@ namespace HeavenStrikeRiven
                     if (R.IsReady() && R.Instance.Name == R1name) R.Cast();
                     E.Cast(Player.Position.Extend(target.Position, 200));
                     Utility.DelayAction.Add(600,() => Player.Spellbook.CastSpell(flash, target.Position));
+                    Utility.DelayAction.Add(610, () => W.Cast());
                 }
             }
         }
