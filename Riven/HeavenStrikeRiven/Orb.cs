@@ -470,9 +470,10 @@ namespace HeavenStrikeRiven
                 if (sender.IsMe &&
                     (args.Target is Obj_AI_Base || args.Target is Obj_BarracksDampener || args.Target is Obj_HQ))
                 {
+                    var windup = Orbwalking.Orbwalker._config.Item("ExtraDoCastWindup").GetValue<Slider>().Value;
                     //_missileLaunched = true;
-                    Utility.DelayAction.Add(37 > Game.Ping ? 37 - Game.Ping : 0, () => FireAfterAttack(sender, _lastTarget));
-                    Utility.DelayAction.Add(37 > Game.Ping ? 37 - Game.Ping : 0, () => StopMove = false);
+                    Utility.DelayAction.Add(40 + windup > Game.Ping ? 40 + windup - Game.Ping : 0, () => FireAfterAttack(sender, _lastTarget));
+                    Utility.DelayAction.Add(40 + windup> Game.Ping ? 40 + windup - Game.Ping : 0, () => StopMove = false);
                     if (args.Target is Obj_AI_Base)
                     {
                         //Trigger it for ranged until the missiles catch normal attacks again!
@@ -568,6 +569,9 @@ namespace HeavenStrikeRiven
                 /* Delay sliders */
                 _config.AddItem(
                     new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 0, 200)));
+                _config.AddItem(
+                    new MenuItem("ExtraDoCastWindup", "Extra windup time for ondocast").SetShared().SetValue(new Slider(0, 0, 10)));
+
                 _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(0, 0, 200)));
                 _config.AddItem(
                     new MenuItem("MovementDelay", "Movement delay").SetShared().SetValue(new Slider(30, 0, 250)))
