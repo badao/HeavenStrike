@@ -16,7 +16,7 @@ namespace HeavenStrikeRiven
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private static string R1name = "RivenFengShuiEngine";
 
-        private static string R2name = "rivenizunablade";
+        private static string R2name = "RivenIzunaBlade";
 
         private static Orbwalking.Orbwalker Orbwalker;
 
@@ -28,7 +28,7 @@ namespace HeavenStrikeRiven
 
         public static bool waitE, waitQ, waitAA, waitW, waitTiamat, waitR1, waitR2, midAA, canAA, forceQ, forceW, forceT, forceR, waitR, castR, forceEburst, qGap
             , R2style;
-
+        public static int waitQTick, waitR2Tick;
         private static AttackableUnit TTTar = null;
 
         public static float cE, cQ, cAA, cW, cTiamt, cR1, cR2, Wind, countforce, Rstate, R2countdonw;
@@ -58,7 +58,7 @@ namespace HeavenStrikeRiven
 
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 325);
+            E = new Spell(SpellSlot.E, 250);
             R = new Spell(SpellSlot.R, 900);
             R.SetSkillshot(0.25f, 45, 1600, false, SkillshotType.SkillshotCone);
             R.MinHitChance = HitChance.Medium;
@@ -105,10 +105,31 @@ namespace HeavenStrikeRiven
             Orbwalking.AfterAttack += AfterAttack;
             Orbwalking.OnAttack += OnAttack;
             Obj_AI_Base.OnProcessSpellCast += oncast;
-
+            Obj_AI_Base.OnPlayAnimation += Obj_AI_Base_OnPlayAnimation;
             Interrupter2.OnInterruptableTarget += interrupt;
             AntiGapcloser.OnEnemyGapcloser += gapcloser;
 
+        }
+
+        private static void Obj_AI_Base_OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
+        {
+            if (!sender.IsMe)
+                return;
+            if (args.Animation == "Spell1a")
+            {
+                Utility.DelayAction.Add(280 - Game.Ping, () => Game.Say("/d"));
+                Qstate = 2;
+            }
+            else if (args.Animation == "Spell1b")
+            {
+                Utility.DelayAction.Add(300 - Game.Ping, () => Game.Say("/d"));
+                Qstate = 3;
+            }
+            else if (args.Animation == "Spell1c")
+            {
+                Utility.DelayAction.Add(380 - Game.Ping, () => Game.Say("/d"));
+                Qstate = 1;
+            }
         }
 
         private static int Qmode { get { return Menu.Item("Qmode").GetValue<StringList>().SelectedIndex; } }
@@ -238,12 +259,16 @@ namespace HeavenStrikeRiven
                     {
                         if (target is Obj_AI_Hero)
                         {
-                            Utility.DelayAction.Add(250, () => R.Cast(target as Obj_AI_Hero));
+                            callbackR2(TTTar);
                         }
                         if (Q.IsReady())
                         {
                             Utility.DelayAction.Add(150, () => callbackQ(TTTar));
                         }
+                    }
+                    else if(Q.IsReady())
+                    {
+                        callbackQ(TTTar);
                     }
 
                 }
@@ -343,23 +368,10 @@ namespace HeavenStrikeRiven
                 Orbwalking.ResetAutoAttackTimer();
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
                 {
-                    switch (Qstate)
-                    {
-                        case 1:
-                            Utility.DelayAction.Add(280 - Game.Ping, () => Game.Say("/d"));
-                            break;
-                        case 2:
-                            Utility.DelayAction.Add(300 - Game.Ping, () => Game.Say("/d"));
-                            break;
-                        case 3:
-                            Utility.DelayAction.Add(380 - Game.Ping, () => Game.Say("/d"));
-                            break;
-                    }
                     Utility.DelayAction.Add(40, () => Reset(40));
                 }
 
                 cQ = Utils.GameTimeTickCount;
-                Qstate = Qstate + 1;
             }
             if (spell.Name.Contains("RivenMartyr"))
             {
@@ -418,19 +430,19 @@ namespace HeavenStrikeRiven
                 if (Orbwalking.InAutoAttackRange(target) && Orbwalking.CanMove(Windup + 20) && (!R.IsReady() || (R.IsReady() && R.Instance.Name == R1name)))
                 {
                     W.Cast();
-                    if (HasItem()) CastItem();
                 }
                 if (Orbwalking.InAutoAttackRange(target) && Orbwalking.CanMove(Windup + 20) && R.IsReady())
                 {
                     if (R.IsReady() && R.Instance.Name == R1name) R.Cast();
-                    if (HasItem()) CastItem();
-                    W.Cast();
+                    Utility.DelayAction.Add(350, () => CastItem());
+                    Utility.DelayAction.Add(400, () => W.Cast());
                 }
                 if (!Orbwalking.InAutoAttackRange(target) && Orbwalking.CanMove(Windup + 20) && E.IsReady() && R.IsReady() && Player.Distance(target.Position) <= E.Range + Player.BoundingRadius + target.BoundingRadius)
                 {
                     E.Cast(Player.Position.Extend(target.Position, 200));
-                    R.Cast();
-                    if (HasItem()) CastItem();
+                    if (R.IsReady() && R.Instance.Name == R1name) R.Cast();
+                    Utility.DelayAction.Add(350, () => CastItem());
+                    Utility.DelayAction.Add(400, () => W.Cast());
                 }
                 if (!Orbwalking.InAutoAttackRange(target) && Orbwalking.CanMove(Windup + 20) && !E.IsReady() && R.IsReady() && !Player.IsDashing()
                     && flash != SpellSlot.Unknown && flash.IsReady() && FlashBurst && Player.Distance(target.Position) <= 425 + Player.BoundingRadius + target.BoundingRadius)
@@ -438,8 +450,8 @@ namespace HeavenStrikeRiven
                     if (R.IsReady() && R.Instance.Name == R1name) R.Cast();
                     var x = Player.Distance(target.Position) > 425 ? Player.Position.Extend(target.Position, 425) : target.Position;
                     Player.Spellbook.CastSpell(flash, x);
-                    if (HasItem()) CastItem();
-                    W.Cast();
+                    Utility.DelayAction.Add(350, () => CastItem());
+                    Utility.DelayAction.Add(400, () => W.Cast());
                 }
                 if (!Orbwalking.InAutoAttackRange(target) && Orbwalking.CanMove(Windup + 20) && E.IsReady() && flash != SpellSlot.Unknown && flash.IsReady() && FlashBurst
                     && R.IsReady() && Player.Distance(target.Position) <= E.Range + Player.BoundingRadius + target.BoundingRadius + 425
@@ -447,8 +459,9 @@ namespace HeavenStrikeRiven
                 {
                     if (R.IsReady() && R.Instance.Name == R1name) R.Cast();
                     E.Cast(Player.Position.Extend(target.Position, 200));
-                    Utility.DelayAction.Add(600,() => Player.Spellbook.CastSpell(flash, target.Position));
-                    Utility.DelayAction.Add(610, () => W.Cast());
+                    Utility.DelayAction.Add(350,() => Player.Spellbook.CastSpell(flash, target.Position));
+                    Utility.DelayAction.Add(350, () => CastItem());
+                    Utility.DelayAction.Add(500, () => W.Cast());
                 }
             }
         }
@@ -592,7 +605,7 @@ namespace HeavenStrikeRiven
         private static void SolvingWaitList()
         {
             if (!Q.IsReady(1000)) Qstate = 1;
-            if (waitQ == true)
+            if (waitQ == true && TTTar.IsValidTarget())
             {
                 //if (Utils.GameTimeTickCount - cQ >= 350 + Player.AttackCastDelay - Game.Ping / 2)
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
@@ -609,8 +622,14 @@ namespace HeavenStrikeRiven
                     else
                         Q.Cast(Game.CursorPos);
                 }
-                //else
-                //    waitQ = false;
+                if (Environment.TickCount - waitQTick >= 500 + Game.Ping / 2)
+                    waitQ = false;
+            }
+            if (waitR2 == true && TTTar.IsValidTarget())
+            {
+                R.Cast(TTTar as Obj_AI_Base);
+                if (Environment.TickCount - waitQTick >= 500 + Game.Ping / 2)
+                    waitQ = false;
             }
             if (Q.IsReady() && UseQBeforeExpiry && !Player.IsRecalling())
             {
@@ -667,6 +686,13 @@ namespace HeavenStrikeRiven
         {
             waitQ = true;
             TTTar = target;
+            waitQTick = Environment.TickCount;
+        }
+        private static void callbackR2(AttackableUnit target)
+        {
+            waitR2 = true;
+            TTTar = target;
+            waitR2Tick = Environment.TickCount;
         }
         public static void checkbuff()
         {
