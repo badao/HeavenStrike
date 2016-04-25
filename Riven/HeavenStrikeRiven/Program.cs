@@ -117,17 +117,20 @@ namespace HeavenStrikeRiven
                 return;
             if (args.Animation == "Spell1a")
             {
-                Utility.DelayAction.Add(280 - Game.Ping, () => Game.Say("/d"));
+                if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
+                    Utility.DelayAction.Add(280 - Game.Ping, () => Game.Say("/d"));
                 Qstate = 2;
             }
             else if (args.Animation == "Spell1b")
             {
-                Utility.DelayAction.Add(300 - Game.Ping, () => Game.Say("/d"));
+                if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
+                    Utility.DelayAction.Add(300 - Game.Ping, () => Game.Say("/d"));
                 Qstate = 3;
             }
             else if (args.Animation == "Spell1c")
             {
-                Utility.DelayAction.Add(380 - Game.Ping, () => Game.Say("/d"));
+                if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
+                    Utility.DelayAction.Add(380 - Game.Ping, () => Game.Say("/d"));
                 Qstate = 1;
             }
         }
