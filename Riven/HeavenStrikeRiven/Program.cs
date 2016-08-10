@@ -118,21 +118,24 @@ namespace HeavenStrikeRiven
             if (args.Animation == "Spell1a")
             {
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
-                    Utility.DelayAction.Add(280 - Game.Ping, () => Game.Say("/d"));
+                {
+                    Utility.DelayAction.Add(280 - Game.Ping, () => Game.SendEmote(Emote.Dance));
+                }
                 Qstate = 2;
             }
             else if (args.Animation == "Spell1b")
             {
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
-                    Utility.DelayAction.Add(300 - Game.Ping, () => Game.Say("/d"));
+                    Utility.DelayAction.Add(300 - Game.Ping, () => Game.SendEmote(Emote.Dance));
                 Qstate = 3;
             }
             else if (args.Animation == "Spell1c")
             {
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
-                    Utility.DelayAction.Add(380 - Game.Ping, () => Game.Say("/d"));
+                    Utility.DelayAction.Add(380 - Game.Ping, () => Game.SendEmote(Emote.Dance));
                 Qstate = 1;
             }
+            
         }
 
         private static int Qmode { get { return Menu.Item("Qmode").GetValue<StringList>().SelectedIndex; } }
@@ -414,7 +417,7 @@ namespace HeavenStrikeRiven
         private static void Cancel()
         {
             Player.IssueOrder(GameObjectOrder.MoveTo, Player.Position.Extend(Game.CursorPos, Player.Distance(Game.CursorPos) + 500));
-            if (Qstrangecancel)Game.Say("/d");
+            if (Qstrangecancel)Game.SendEmote(Emote.Dance);
         }
         private static void OnAttack(AttackableUnit unit, AttackableUnit target)
         {
