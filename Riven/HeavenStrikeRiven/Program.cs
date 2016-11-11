@@ -115,7 +115,7 @@ namespace HeavenStrikeRiven
         {
             if (!sender.IsMe)
                 return;
-            if (args.Animation == "Spell1a")
+            if (args.Animation.Contains("c29"))
             {
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
                 {
@@ -123,13 +123,13 @@ namespace HeavenStrikeRiven
                 }
                 Qstate = 2;
             }
-            else if (args.Animation == "Spell1b")
+            else if (args.Animation.Contains("c39"))
             {
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
                     Utility.DelayAction.Add(300 - Game.Ping, () => Game.SendEmote(Emote.Dance));
                 Qstate = 3;
             }
-            else if (args.Animation == "Spell1c")
+            else if (args.Animation.Contains("c49"))
             {
                 if (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
                     Utility.DelayAction.Add(380 - Game.Ping, () => Game.SendEmote(Emote.Dance));
